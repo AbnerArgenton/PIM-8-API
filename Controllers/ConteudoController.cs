@@ -46,15 +46,7 @@ namespace SistemaStreaming.Controllers
             _context.Conteudos.Add(conteudo);
             _context.SaveChanges();
 
-            var conteudoDto = new ConteudoDto
-            {
-                ConteudoID = conteudo.ID,
-                Titulo = conteudo.Titulo,
-                Descricao = conteudo.Descricao,
-                Link = conteudo.Link, // Atualize aqui também
-                CriadorID = conteudo.CriadorID,
-                NomeCriador = criador.Nome
-            };
+            var conteudoDto = new ConteudoDto(conteudo);
 
             return CreatedAtAction(nameof(PostConteudo), new { id = conteudoDto.ConteudoID }, conteudoDto);
         }
@@ -105,15 +97,7 @@ namespace SistemaStreaming.Controllers
                 return NotFound("Conteúdo não encontrado.");
             }
 
-            var conteudoDto = new ConteudoDto
-            {
-                ConteudoID = conteudo.ID,
-                Titulo = conteudo.Titulo,
-                Descricao = conteudo.Descricao,
-                Link = conteudo.Link,
-                CriadorID = conteudo.CriadorID,
-                NomeCriador = conteudo.Criador?.Nome
-            };
+            var conteudoDto = new ConteudoDto(conteudo);
 
             return Ok(conteudoDto);
         }
@@ -124,14 +108,7 @@ namespace SistemaStreaming.Controllers
         {
             var conteudos = _context.Conteudos
                 .Where(c => c.CriadorID == criadorId)
-                .Select(c => new
-                {
-                    c.ID,
-                    c.Titulo,
-                    c.Descricao,
-                    Link = c.Link ?? "Link não disponível", // Trate o valor nulo aqui
-                    CriadorID = c.CriadorID
-                })
+                .Select(conteudo => new ConteudoDto(conteudo))
                 .ToList();
 
             if (!conteudos.Any())
@@ -149,15 +126,7 @@ namespace SistemaStreaming.Controllers
         {
             // Busca todos os conteúdos, tratando valores nulos
             var conteudos = _context.Conteudos
-                .Select(c => new ConteudoDto
-                {
-                    ConteudoID = c.ID,
-                    Titulo = c.Titulo,
-                    Descricao = c.Descricao,
-                    Link = c.Link ?? "Link não disponível", // Tratar o valor nulo para Link
-                    CriadorID = c.CriadorID,
-                    NomeCriador = c.Criador != null ? c.Criador.Nome : "Criador desconhecido" // Tratamento para Criador
-                }).ToList();
+                .Select(conteudo => new ConteudoDto(conteudo)).ToList();
 
             // Verifica se há conteúdos
             if (!conteudos.Any())
